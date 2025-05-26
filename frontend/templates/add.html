@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block title %}Add Task{% endblock %}
+{% block content %}
+<h2 class="mb-4">Add New Task</h2>
+<form method="POST">
+  <div class="mb-3">
+    <label for="title" class="form-label">Task Title</label>
+    <input type="text" class="form-control" id="title" name="title" required>
+  </div>
+  <div class="mb-3">
+    <label for="description" class="form-label">Description</label>
+    <textarea class="form-control" id="description" name="description" required></textarea>
+  </div>
+  <div class="mb-3">
+    <label>Status</label>
+    <select class="form-select" name="status">
+      <option>Pending</option>
+      <option>In Progress</option>
+      <option>Completed</option>
+    </select>
+  </div>
+  <button type="submit" class="btn btn-primary">Add Task</button>
+</form>
+{% endblock %}
