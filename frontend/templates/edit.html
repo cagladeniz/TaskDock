@@ -2,23 +2,39 @@
 {% block title %}Edit Task{% endblock %}
 {% block content %}
 <h2 class="mb-4">Edit Task</h2>
-<form method="POST">
-  <div class="mb-3">
-    <label for="title" class="form-label">Task Title</label>
-    <input type="text" class="form-control" id="title" name="title" value="{{ task.title }}" required>
-  </div>
-  <div class="mb-3">
-    <label for="description" class="form-label">Description</label>
-    <textarea class="form-control" id="description" name="description" required>{{ task.description }}</textarea>
-  </div>
-  <div class="mb-3">
-    <label>Status</label>
-    <select class="form-select" name="status">
-      <option {% if task.status == 'Pending' %}selected{% endif %}>Pending</option>
-      <option {% if task.status == 'In Progress' %}selected{% endif %}>In Progress</option>
-      <option {% if task.status == 'Completed' %}selected{% endif %}>Completed</option>
-    </select>
-  </div>
-  <button type="submit" class="btn btn-primary">Update Task</button>
-</form>
+<div class="card shadow-sm p-4">
+  <form method="POST">
+    <div class="mb-3">
+      <label for="title" class="form-label">Task Title</label>
+      <input type="text" class="form-control" id="title" name="title" value="{{ task.title }}" required>
+    </div>
+    <div class="mb-3">
+      <label for="description" class="form-label">Description</label>
+      <textarea class="form-control" id="description" name="description" rows="3" required>{{ task.description }}</textarea>
+    </div>
+    <div class="mb-3">
+      <label for="status" class="form-label">Status</label>
+      <select class="form-select" name="status">
+        <option {% if task.status == 'Pending' %}selected{% endif %}>Pending</option>
+        <option {% if task.status == 'In Progress' %}selected{% endif %}>In Progress</option>
+        <option {% if task.status == 'Completed' %}selected{% endif %}>Completed</option>
+      </select>
+    </div>
+    <div class="mb-3">
+      <label for="group" class="form-label">Task Group</label>
+      <input type="text" class="form-control" id="group" name="group" value="{{ task.group }}">
+    </div>
+    <div class="mb-3">
+      <label for="category" class="form-label">Category</label>
+      <input type="text" class="form-control" id="category" name="category" value="{{ task.category }}">
+    </div>
+    <div class="mb-3">
+      <label for="due_date" class="form-label">Due Date</label>
+      <input type="date" class="form-control" id="due_date" name="due_date" value="{{ task.due_date }}">
+    </div>
+    <div class="d-grid">
+      <button type="submit" class="btn btn-primary">Update Task</button>
+    </div>
+  </form>
+</div>
 {% endblock %}

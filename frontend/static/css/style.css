@@ -1,10 +1,69 @@
-.sidebar {
-  width: 250px;
-  min-height: 100vh;
+body {
+    background-color: #f8f9fa;
+  }
+  
+  /* Status etiketlerinin renkleri */
+  .bg-success-subtle {
+    background-color: #d1e7dd !important;
+  }
+  
+  .bg-warning-subtle {
+    background-color: #fff3cd !important;
+  }
+  
+  .bg-info-subtle {
+    background-color: #cff4fc !important;
+  }
+  
+  /* Overdue task kartı için kırmızı kenarlık */
+  .border-danger {
+    border-width: 2px !important;
+  }
+  
+  .task-board {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
 }
-.content {
-  flex: 1;
+
+.task-card {
+  background: #fff;
+  padding: 1.5rem;
+  border-radius: 1rem;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  width: 100%;
+  max-width: 350px;
+  position: relative;
 }
-.card-title {
+
+.task-header {
   font-weight: 600;
+  font-size: 1.1rem;
+  margin-bottom: .5rem;
+}
+
+.task-description {
+  font-size: 0.95rem;
+  margin-bottom: 0.75rem;
+}
+
+.task-status-container {
+  position: absolute;
+  bottom: 1rem;
+  right: 1rem;
+}
+
+.status-completed {
+  background-color: #d1e7dd !important;
+  color: #198754 !important;
+}
+
+.status-pending {
+  background-color: #fff3cd !important;
+  color: #ffc107 !important;
+}
+
+.status-in-progress {
+  background-color: #cff4fc !important;
+  color: #0dcaf0 !important;
 }

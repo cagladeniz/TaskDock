@@ -4,6 +4,8 @@ services:
     build: ./backend
     ports:
       - "5001:5001"
+    volumes:
+      - backend_data:/app/data
 
   frontend:
     build: ./frontend
@@ -11,3 +13,6 @@ services:
       - "5050:5000"   
     depends_on:
       - backend
+  
+volumes:
+    backend_data:
