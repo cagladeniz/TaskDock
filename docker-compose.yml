@@ -2,6 +2,7 @@ version: '3'
 services:
   backend:
     build: ./backend
+    image: taskdockfinal-backend
     ports:
       - "5001:5001"
     volumes:

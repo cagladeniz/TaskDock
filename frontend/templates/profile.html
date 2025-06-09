@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% set active = 'profile' %}
+{% block title %}Profile{% endblock %}
+{% block content %}
+
+<div class="container">
+  <h2 class="mb-4 fw-bold">Your Profile</h2>
+
+  {% if user %}
+  <form method="POST" enctype="multipart/form-data" class="bg-white p-4 rounded shadow-sm" style="max-width: 600px;">
+    <!-- Profil Fotoğrafı -->
+    <div class="mb-3 text-center">
+      {% if user.image %}
+        <img src="{{ url_for('static', filename='uploads/' ~ user.image) }}" class="rounded-circle mb-2" width="120" height="120" alt="Profile Picture">
+      {% else %}
+        <img src="/static/img/profile.png" class="rounded-circle mb-2" width="120" height="120" alt="Default Profile Picture">
+      {% endif %}
+      <div class="mt-2">
+        <input type="file" name="profile_pic" class="form-control">
+      </div>
+    </div>
+
+    <!-- Ad Soyad -->
+    <div class="mb-3">
+      <label for="name" class="form-label">First Name</label>
+      <input type="text" class="form-control" name="name" id="name" value="{{ user.name }}">
+    </div>
+    <div class="mb-3">
+      <label for="surname" class="form-label">Last Name</label>
+      <input type="text" class="form-control" name="surname" id="surname" value="{{ user.surname }}">
+    </div>
+    <div class="mb-3">
+      <label for="email" class="form-label">Email</label>
+      <input type="email" class="form-control" id="email" value="{{ user.email }}" disabled>
+    </div>
+    <button type="submit" class="btn btn-primary">Update Info</button>
+  </form>
+  {% endif %}
+
+  <div class="mt-5 p-4 bg-white rounded shadow-sm" style="max-width: 600px;">
+    <h5 class="fw-semibold mb-3">Task Statistics</h5>
+    <ul class="list-group">
+      <li class="list-group-item d-flex justify-content-between">Total Tasks <span>{{ total }}</span></li>
+      <li class="list-group-item d-flex justify-content-between">Completed <span>{{ completed }}</span></li>
+      <li class="list-group-item d-flex justify-content-between">Pending <span>{{ pending }}</span></li>
+      <li class="list-group-item d-flex justify-content-between">In Progress <span>{{ inprogress }}</span></li>
+    </ul>
+  </div>
+</div>
+
+{% endblock %}

@@ -1,5 +1,8 @@
+import sqlite3
 from flask import Flask, request, jsonify
 from models import (
+    get_user_by_id,
+    get_user_task_stats,
     init_db,
     get_tasks_by_user,
     get_task_by_id,
@@ -15,8 +18,31 @@ init_db()
 @app.route("/api/register", methods=["POST"])
 def register():
     data = request.get_json()
-    success = create_user(data["email"], data["password"])
+    success = create_user(
+        data["name"],
+        data["surname"],
+        data["email"],
+        data["password"]
+    )
     return jsonify({"success": success}), 201 if success else 400
+
+@app.route("/api/user/<int:user_id>/update", methods=["PUT"])
+def update_user(user_id):
+    data = request.get_json()
+    fields = ["name", "surname"]
+    values = [data["name"], data["surname"]]
+
+    if "image" in data:
+        fields.append("image")
+        values.append(data["image"])
+
+    values.append(user_id)
+    conn = sqlite3.connect("data/tasks.db")
+    cur = conn.cursor()
+    cur.execute(f"UPDATE users SET {', '.join(f + ' = ?' for f in fields)} WHERE id = ?", values)
+    conn.commit()
+    conn.close()
+    return jsonify({"success": True})
 
 @app.route("/api/login", methods=["POST"])
 def login():
@@ -34,7 +60,6 @@ def user_tasks(user_id):
             data["title"],
             data.get("description", ""),
             data.get("status", "Pending"),
-            data.get("group", ""),
             data.get("category", ""),
             data.get("due_date", ""),
             user_id
@@ -54,7 +79,6 @@ def task_by_id(task_id):
             data["title"],
             data.get("description", ""),
             data.get("status", "Pending"),
-            data.get("group", ""),
             data.get("category", ""),
             data.get("due_date", "")
         )
@@ -62,6 +86,43 @@ def task_by_id(task_id):
     elif request.method == "DELETE":
         delete_task(task_id)
         return jsonify({"message": "Task deleted"}), 200
+    
+@app.route("/api/user/<int:user_id>", methods=["GET"])
+def get_user(user_id):
+    user = get_user_by_id(user_id)
+    return jsonify(user)
+
+@app.route("/api/user/<int:user_id>/stats", methods=["GET"])
+def get_stats(user_id):
+    stats = get_user_task_stats(user_id)
+    return jsonify(stats)
+
+@app.route("/api/categories/rename", methods=["PUT"])
+def rename_category_api():
+    data = request.get_json()
+    user_id = data["user_id"]
+    old = data["old_name"]
+    new = data["new_name"]
+
+    conn = sqlite3.connect("data/tasks.db")
+    cur = conn.cursor()
+    cur.execute("UPDATE tasks SET category = ? WHERE user_id = ? AND category = ?", (new, user_id, old))
+    conn.commit()
+    conn.close()
+    return jsonify({"message": "Renamed"}), 200
+
+@app.route("/api/categories/delete", methods=["PUT"])
+def delete_category_api():
+    data = request.get_json()
+    user_id = data["user_id"]
+    name = data["name"]
+
+    conn = sqlite3.connect("data/tasks.db")
+    cur = conn.cursor()
+    cur.execute("UPDATE tasks SET category = NULL WHERE user_id = ? AND category = ?", (user_id, name))
+    conn.commit()
+    conn.close()
+    return jsonify({"message": "Deleted"}), 200
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5001)

@@ -1,66 +1,139 @@
 {% extends 'base.html' %}
 {% block title %}Task Board{% endblock %}
 {% block content %}
-<h2 class="mb-4">Task Board</h2>
+<h2 class="mb-4 d-flex justify-content-between align-items-center">
+  Task Board
+  <button id="toggle-button" class="btn btn-outline-primary" onclick="toggleStats()">Show Stats</button>
+</h2>
 
-<!-- Filtreleme Formu -->
-<form method="GET" class="row g-3 mb-4">
+<!-- Filtreleme Butonu -->
+<div class="text-start mb-3">
+  <button id="filter-toggle-btn" class="btn btn-outline-secondary" onclick="toggleFilter()">🔍 Filter</button>
+</div>
+
+<!-- Filtreleme Paneli -->
+<form method="GET" id="filter-panel" class="row g-3 align-items-end mb-4 fade" style="display: none; opacity: 0;">
   <div class="col-md-3">
-    <select name="status" class="form-select">
-      <option value="">All Status</option>
+    <label for="status" class="form-label">Status</label>
+    <select name="status" id="status" class="form-select">
+      <option value="">All</option>
       <option value="Pending">Pending</option>
       <option value="In Progress">In Progress</option>
       <option value="Completed">Completed</option>
     </select>
   </div>
   <div class="col-md-3">
-    <input type="text" name="category" class="form-control" placeholder="Category">
+    <label for="category" class="form-label">Category</label>
+    <input type="text" name="category" id="category" class="form-control" placeholder="Enter category">
   </div>
   <div class="col-md-3">
-    <input type="date" name="due_before" class="form-control" placeholder="Due Before">
+    <label for="due_before" class="form-label">Due Before</label>
+    <input type="date" name="due_before" id="due_before" class="form-control">
   </div>
-  <div class="col-md-3">
-    <button type="submit" class="btn btn-outline-primary w-100">Filter</button>
+  <div class="col-md-3 text-end">
+    <button type="submit" class="btn btn-primary w-100">Apply Filter</button>
   </div>
 </form>
 
-<!-- Görev Kartları -->
-<div class="row mt-2">
-  {% for task in tasks %}
-  {% set overdue = task.due_date and (task.due_date < current_date) %}
-  <div class="col-md-4 mb-3">
-    <div class="card shadow-sm position-relative {% if overdue %}border border-danger{% endif %}">
-      <div class="card-body">
-        <h5 class="card-title">{{ task.title }}</h5>
-        <p class="card-text">{{ task.description }}</p>
-        <p class="mb-1"><strong>Group:</strong> {{ task.group }}</p>
-        <p class="mb-1"><strong>Category:</strong> {{ task.category }}</p>
-        <p class="mb-1">
-          <strong>Due Date:</strong> {{ task.due_date }}
-          {% if overdue %}
-            <span class="badge bg-danger text-white ms-2">Overdue</span>
-          {% endif %}
-        </p>
+<!-- Stats Panel (gizli başlar, üstte açılır) -->
+<div id="stats-panel" class="row g-3 align-items-end mb-4 fade" style="display: none; opacity: 0;">
+  <div class="card p-3 text-center" style="min-width: 160px; flex: 1;">
+    <h6 class="mb-1">Total Tasks</h6>
+    <h4>{{ stats.total }}</h4>
+  </div>
+  <div class="card p-3 text-center text-success" style="min-width: 160px; flex: 1;">
+    <h6 class="mb-1">Completed</h6>
+    <h4>{{ stats.completed }}</h4>
+  </div>
+  <div class="card p-3 text-center text-warning" style="min-width: 160px; flex: 1;">
+    <h6 class="mb-1">Pending</h6>
+    <h4>{{ stats.pending }}</h4>
+  </div>
+  <div class="card p-3 text-center text-info" style="min-width: 160px; flex: 1;">
+    <h6 class="mb-1">In Progress</h6>
+    <h4>{{ stats.inprogress }}</h4>
+  </div>
+</div>
 
-        <!-- Status Etiketi -->
-        <div class="position-absolute bottom-0 end-0 m-2">
-          {% if task.status == 'Completed' %}
-            <span class="badge rounded-pill bg-success-subtle text-success border border-success">Completed</span>
-          {% elif task.status == 'Pending' %}
-            <span class="badge rounded-pill bg-warning-subtle text-warning border border-warning">Pending</span>
-          {% elif task.status == 'In Progress' %}
-            <span class="badge rounded-pill bg-info-subtle text-info border border-info">In Progress</span>
-          {% endif %}
+<!-- Görev Panosu -->
+<div class="row">
+  <div class="d-flex overflow-auto">
+    {% for category, tasks_in_category in grouped_tasks.items() %}
+    <div class="me-4" style="min-width: 300px;">
+      <h5 class="mb-3">{{ category if category else 'Uncategorized' }}</h5>
+      <div class="d-flex flex-column gap-3">
+        {% for task in tasks_in_category %}
+        {% set overdue = task.due_date and (task.due_date < current_date) %}
+        <div class="task-card position-relative {% if overdue %}border border-danger{% endif %}">
+          <div class="task-header">{{ task.title }}</div>
+          <div class="task-description">{{ task.description }}</div>
+          <p class="mb-1">
+            <strong>Due Date:</strong> {{ task.due_date }}
+            {% if overdue %}
+              <span class="badge bg-danger text-white ms-2">Overdue</span>
+            {% endif %}
+          </p>
+          <div class="task-status-container">
+            {% if task.status == 'Completed' %}
+              <span class="badge rounded-pill status-completed border border-success">Completed</span>
+            {% elif task.status == 'Pending' %}
+              <span class="badge rounded-pill status-pending border border-warning">Pending</span>
+            {% elif task.status == 'In Progress' %}
+              <span class="badge rounded-pill status-in-progress border border-info">In Progress</span>
+            {% endif %}
+          </div>
+          <div class="mt-3">
+            <a href="/edit/{{ task.id }}" class="btn btn-sm btn-warning me-2">Edit</a>
+            <a href="/delete/{{ task.id }}" class="btn btn-sm btn-danger">Delete</a>
+          </div>
         </div>
-
-        <!-- Action Butonları -->
-        <div class="mt-3">
-          <a href="/edit/{{ task.id }}" class="btn btn-sm btn-warning me-2">Edit</a>
-          <a href="/delete/{{ task.id }}" class="btn btn-sm btn-danger">Delete</a>
-        </div>
+        {% endfor %}
       </div>
     </div>
+    {% endfor %}
   </div>
-  {% endfor %}
 </div>
+
+<!-- JS -->
+<script>
+function toggleStats() {
+  const panel = document.getElementById("stats-panel");
+  const button = document.getElementById("toggle-button");
+
+  if (panel.style.display === "none") {
+    panel.style.opacity = 0;
+    panel.style.display = "flex";
+    setTimeout(() => {
+      panel.style.opacity = 1;
+    }, 10);
+    button.textContent = "Hide Stats";
+  } else {
+    panel.style.opacity = 0;
+    setTimeout(() => {
+      panel.style.display = "none";
+    }, 500);
+    button.textContent = "Show Stats";
+  }
+}
+
+function toggleFilter() {
+  const panel = document.getElementById("filter-panel");
+  const button = document.getElementById("filter-toggle-btn");
+
+  if (panel.style.display === "none") {
+    panel.style.opacity = 0;
+    panel.style.display = "flex";
+    setTimeout(() => {
+      panel.style.opacity = 1;
+    }, 10);
+    button.textContent = "❌ Hide Filters";
+  } else {
+    panel.style.opacity = 0;
+    setTimeout(() => {
+      panel.style.display = "none";
+    }, 400);
+    button.textContent = "🔍 Filter Tasks";
+  }
+}
+</script>
 {% endblock %}

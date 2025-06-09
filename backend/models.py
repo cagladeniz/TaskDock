@@ -4,40 +4,41 @@ import hashlib
 def init_db():
     conn = sqlite3.connect("data/tasks.db")
     cur = conn.cursor()
-
     cur.execute("""
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT,
+            surname TEXT,
             email TEXT NOT NULL UNIQUE,
             password_hash TEXT NOT NULL
         )
     """)
-
     cur.execute("""
         CREATE TABLE IF NOT EXISTS tasks (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             title TEXT NOT NULL,
             description TEXT,
             status TEXT,
-            group_name TEXT,
             category TEXT,
             due_date TEXT,
             user_id INTEGER,
             FOREIGN KEY(user_id) REFERENCES users(id)
         )
     """)
-
     conn.commit()
     conn.close()
 
 def hash_password(password):
     return hashlib.sha256(password.encode()).hexdigest()
 
-def create_user(email, password):
+def create_user(name, surname, email, password):
     conn = sqlite3.connect("data/tasks.db")
     cur = conn.cursor()
     try:
-        cur.execute("INSERT INTO users (email, password_hash) VALUES (?, ?)", (email, hash_password(password)))
+        cur.execute(
+            "INSERT INTO users (name, surname, email, password_hash) VALUES (?, ?, ?, ?)",
+            (name, surname, email, hash_password(password))
+        )
         conn.commit()
     except sqlite3.IntegrityError:
         conn.close()
@@ -62,7 +63,6 @@ def get_tasks_by_user(user_id):
         "title": row[1],
         "description": row[2],
         "status": row[3],
-        "group": row[4],
         "category": row[5],
         "due_date": row[6],
         "user_id": row[7]
@@ -82,29 +82,28 @@ def get_task_by_id(task_id):
             "title": row[1],
             "description": row[2],
             "status": row[3],
-            "group": row[4],
             "category": row[5],
             "due_date": row[6],
             "user_id": row[7]
         }
     return None
 
-def add_task(title, description, status, group, category, due_date, user_id):
+def add_task(title, description, status, category, due_date, user_id):
     conn = sqlite3.connect("data/tasks.db")
     cur = conn.cursor()
     cur.execute(
-        "INSERT INTO tasks (title, description, status, group_name, category, due_date, user_id) VALUES (?, ?, ?, ?, ?, ?, ?)",
-        (title, description, status, group, category, due_date, user_id)
+        "INSERT INTO tasks (title, description, status, category, due_date, user_id) VALUES (?, ?, ?, ?, ?, ?)",
+        (title, description, status, category, due_date, user_id)
     )
     conn.commit()
     conn.close()
 
-def update_task(task_id, title, description, status, group, category, due_date):
+def update_task(task_id, title, description, status, category, due_date):
     conn = sqlite3.connect("data/tasks.db")
     cur = conn.cursor()
     cur.execute(
-        "UPDATE tasks SET title=?, description=?, status=?, group_name=?, category=?, due_date=? WHERE id=?",
-        (title, description, status, group, category, due_date, task_id)
+        "UPDATE tasks SET title=?, description=?, status=?, category=?, due_date=? WHERE id=?",
+        (title, description, status, category, due_date, task_id)
     )
     conn.commit()
     conn.close()
@@ -116,3 +115,28 @@ def delete_task(task_id):
     conn.commit()
     conn.close()
     
+# --- Destek fonksiyonları ---
+
+def get_user_by_id(user_id):
+    conn = sqlite3.connect("data/tasks.db")
+    conn.row_factory = sqlite3.Row
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM users WHERE id = ?", (user_id,))
+    user = cur.fetchone()
+    conn.close()
+    return dict(user) if user else None
+
+def get_user_task_stats(user_id):
+    conn = sqlite3.connect("data/tasks.db")
+    cur = conn.cursor()
+    total = cur.execute("SELECT COUNT(*) FROM tasks WHERE user_id = ?", (user_id,)).fetchone()[0]
+    completed = cur.execute("SELECT COUNT(*) FROM tasks WHERE user_id = ? AND status = 'Completed'", (user_id,)).fetchone()[0]
+    pending = cur.execute("SELECT COUNT(*) FROM tasks WHERE user_id = ? AND status = 'Pending'", (user_id,)).fetchone()[0]
+    inprogress = cur.execute("SELECT COUNT(*) FROM tasks WHERE user_id = ? AND status = 'In Progress'", (user_id,)).fetchone()[0]
+    conn.close()
+    return {
+        "total": total,
+        "completed": completed,
+        "pending": pending,
+        "inprogress": inprogress
+    }

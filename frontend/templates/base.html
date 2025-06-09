@@ -5,37 +5,72 @@
   <title>{% block title %}TaskDock{% endblock %}</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body>
   <div class="d-flex">
     {% if not hide_sidebar %}
-    <div class="sidebar bg-primary text-white p-4" style="min-width: 220px; height: 100vh;">
-      <h4 class="mb-4">TaskDock</h4>
-      <ul class="nav flex-column">
-        <li class="nav-item"><a class="nav-link text-white {% if active == 'dashboard' %}fw-bold bg-light text-dark rounded{% endif %}" href="/">Dashboard</a></li>
-        <li class="nav-item"><a class="nav-link text-white {% if active == 'completed' %}fw-bold bg-light text-dark rounded{% endif %}" href="/completed">Completed Tasks</a></li>
-        <li class="nav-item"><a class="nav-link text-white {% if active == 'pending' %}fw-bold bg-light text-dark rounded{% endif %}" href="/pending">Pending Tasks</a></li>
-        <li class="nav-item"><a class="nav-link text-white {% if active == 'inprogress' %}fw-bold bg-light text-dark rounded{% endif %}" href="/in-progress">In Progress Tasks</a></li>
-        <li class="nav-item"><a class="nav-link text-white {% if active == 'add' %}fw-bold bg-light text-dark rounded{% endif %}" href="/add">Add New Task</a></li>
+    <div id="sidebar" class="sidebar text-white px-4 py-5 rounded-end-5" style="background: linear-gradient(180deg, #977DFF 0%, #0033FF 100%); min-width: 220px; height: 100vh; transition: transform 0.3s ease-in-out;">
+      <div class="text-center mb-5">
+        <img src="/static/img/logo.png" class="rounded-circle me-2" alt="TaskDock" width="36" class="mb-2">
+        <h4 class="fw-bold">TaskDock</h4>
+      </div>
+      <ul class="nav flex-column gap-2">
+        <li class="nav-item"><a class="nav-link text-white {% if active == 'dashboard' %}fw-bold bg-white text-dark rounded{% endif %}" href="/">Dashboard</a></li>
+        <li class="nav-item"><a class="nav-link text-white {% if active == 'profile' %}fw-bold bg-white text-dark rounded{% endif %}" href="/profile">Profile</a></li>
+        <li class="nav-item"><a class="nav-link text-white {% if active == 'categories' %}fw-bold bg-white text-dark rounded{% endif %}" href="/categories">Categories</a></li>
+        <li class="nav-item"><a class="nav-link text-white {% if active == 'add' %}fw-bold bg-white text-dark rounded{% endif %}" href="/add">Add New Task</a></li>
       </ul>
+      <div class="mt-auto">
+        <a href="/logout" class="btn btn-outline-light w-100">Logout</a>
+      </div>
     </div>
     {% endif %}
 
     <div class="content container-fluid p-4">
       {% if not hide_navbar %}
-      <nav class="d-flex justify-content-end mb-4">
-        {% if session.get('user_id') %}
-          <a href="/add" class="btn btn-outline-success me-2">Add Task</a>
-          <a href="/logout" class="btn btn-outline-danger">Logout</a>
-        {% else %}
-          <a href="/login" class="btn btn-outline-primary me-2">Login</a>
-          <a href="/register" class="btn btn-outline-secondary">Register</a>
-        {% endif %}
+      <nav class="d-flex justify-content-between align-items-center mb-4">
+        <div class="d-flex align-items-center">
+          <button id="toggleBtn" class="btn btn-sm btn-light mt-3">☰</button>
+          <img src="{% if user.image %}{{ url_for('static', filename='uploads/' ~ user.image) }}{% else %}/static/img/profile.png{% endif %}"
+            class="rounded-circle me-2" width="32" height="32" alt="Profile">
+          <a href="/profile" class="text-dark text-decoration-none">Hi, {{ user.name }}</a>
+        </div>
+        <div class="d-flex align-items-center">
+          <div class="dropdown me-3">
+            <button class="btn btn-light position-relative" data-bs-toggle="dropdown">
+              <i class="bi bi-bell"></i>
+              <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle"></span>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" href="#">Drink water is due today!</a></li>
+              <li><a class="dropdown-item" href="#">1 task is overdue</a></li>
+            </ul>
+          </div>
+          {% if not session.get('user_id') %}
+            <a href="/login" class="btn btn-outline-primary me-2">Login</a>
+            <a href="/register" class="btn btn-outline-secondary">Register</a>
+          {% endif %}
+        </div>
       </nav>
       {% endif %}
 
       {% block content %}{% endblock %}
     </div>
   </div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const toggleBtn = document.getElementById("toggleBtn");
+    const sidebar = document.getElementById("sidebar");
+    const content = document.querySelector(".content");
+
+    toggleBtn.addEventListener("click", () => {
+      sidebar.classList.toggle("d-none");
+      content.classList.toggle("w-100");
+    });
+  });
+</script>
 </body>
 </html>
