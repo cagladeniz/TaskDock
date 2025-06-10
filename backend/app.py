@@ -103,7 +103,6 @@ def rename_category_api():
     user_id = data["user_id"]
     old = data["old_name"]
     new = data["new_name"]
-
     conn = sqlite3.connect("data/tasks.db")
     cur = conn.cursor()
     cur.execute("UPDATE tasks SET category = ? WHERE user_id = ? AND category = ?", (new, user_id, old))
@@ -123,6 +122,33 @@ def delete_category_api():
     conn.commit()
     conn.close()
     return jsonify({"message": "Deleted"}), 200
+
+@app.route('/api/categories/add', methods=['POST'])
+def add_category():
+    data = request.get_json()
+    user_id = data.get("user_id")
+    category = data.get("category")
+    if not user_id or not category:
+        return jsonify({"error": "Missing user_id or category"}), 400
+    conn = sqlite3.connect("data/tasks.db")
+    cur = conn.cursor()
+    cur.execute("SELECT 1 FROM categories WHERE user_id = ? AND name = ?", (user_id, category))
+    if cur.fetchone():
+        conn.close()
+        return jsonify({"message": "Category already exists"}), 200
+    cur.execute("INSERT INTO categories (user_id, name) VALUES (?, ?)", (user_id, category))
+    conn.commit()
+    conn.close()
+    return jsonify({"message": "Category added"}), 201
+
+@app.route('/api/categories/<int:user_id>')
+def get_categories(user_id):
+    conn = sqlite3.connect("data/tasks.db")
+    cur = conn.cursor()
+    cur.execute("SELECT name FROM categories WHERE user_id = ?", (user_id,))
+    results = [row[0] for row in cur.fetchall()]
+    conn.close()
+    return jsonify(results)
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5001)

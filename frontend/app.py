@@ -8,46 +8,86 @@ from collections import defaultdict, Counter
 app = Flask(__name__)
 app.secret_key = 'supersecretkey'
 
-UPLOAD_FOLDER = 'static/uploads'
+UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), 'static/uploads')
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+API_URL = "http://backend:5001"
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-API_URL = "http://backend:5001"
-
 @app.context_processor
 def inject_user():
     user_id = session.get("user_id")
+    user = None
+    notifications = []
     if user_id:
         try:
             user = requests.get(f"{API_URL}/api/user/{user_id}").json()
-            return dict(user=user)
+            tasks = requests.get(f"{API_URL}/api/tasks/{user_id}").json()
+            today = date.today().isoformat()
+            for task in tasks:
+                due = task.get("due_date")
+                if due:
+                    if due == today:
+                        notifications.append(f"'{task['title']}' is due today!")
+                    elif due < today:
+                        notifications.append(f"'{task['title']}' is overdue!")
         except:
-            return dict(user=None)
-    return dict(user=None)
+            pass
+    return dict(user=user, notifications=notifications)
 
-@app.route("/")
+@app.route('/')
+def index():
+    if "user_id" in session:
+        return redirect("/home")
+    return render_template('index.html', hide_sidebar=True, hide_navbar=True)
+
+@app.route('/home')
 def home():
     if "user_id" not in session:
         return redirect("/login")
-    user = requests.get(f"{API_URL}/api/user/{session['user_id']}").json()
+    
     all_tasks = requests.get(f"{API_URL}/api/tasks/{session['user_id']}").json()
+    status_filter = request.args.get("status")
+    category_filter = request.args.get("category")
+    due_before = request.args.get("due_before")
+    today = date.today().isoformat()
+    filtered_tasks = []
+    overdue_count = 0
+
+    for task in all_tasks:
+        is_overdue = (
+            task.get("due_date") and
+            task["due_date"] < today and
+            task["status"] in ["Pending", "In Progress"]
+        )
+        task["is_overdue"] = is_overdue
+        if is_overdue:
+            overdue_count += 1
+        if status_filter and task["status"] != status_filter:
+            continue
+        if category_filter and category_filter.lower() not in (task["category"] or "").lower():
+            continue
+        if due_before and task["due_date"] and task["due_date"] > due_before:
+            continue
+        filtered_tasks.append(task)
 
     grouped_tasks = defaultdict(list)
-    for task in all_tasks:
+    for task in filtered_tasks:
         cat = task["category"] if task["category"] else "Uncategorized"
         grouped_tasks[cat].append(task)
 
-    status_count = Counter(t["status"] for t in all_tasks)
+    status_count = Counter(t["status"] for t in filtered_tasks)
     stats = {
-        "total": len(all_tasks),
+        "total": len(filtered_tasks),
         "completed": status_count.get("Completed", 0),
         "pending": status_count.get("Pending", 0),
-        "inprogress": status_count.get("In Progress", 0)
+        "inprogress": status_count.get("In Progress", 0),
+        "overdue": overdue_count
     }
-    return render_template("home.html", grouped_tasks=grouped_tasks, current_date=date.today().isoformat(), stats=stats)
+    return render_template("home.html", grouped_tasks=grouped_tasks, current_date=today, stats=stats)
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -58,7 +98,7 @@ def login():
             res = requests.post(f"{API_URL}/api/login", json={"email": email, "password": password})
             if res.status_code == 200:
                 session["user_id"] = res.json()["user_id"]
-                return redirect("/")
+                return redirect("/home")
             else:
                 error = "Invalid credentials"
         except:
@@ -98,6 +138,8 @@ def logout():
 def add():
     if "user_id" not in session:
         return redirect("/login")
+    response = requests.get(f"{API_URL}/api/categories/{session['user_id']}")
+    unique_categories = response.json()
     if request.method == "POST":
         task = {
             "title": request.form["title"],
@@ -107,13 +149,15 @@ def add():
             "due_date": request.form["due_date"]
         }
         requests.post(f"{API_URL}/api/tasks/{session['user_id']}", json=task)
-        return redirect("/")
-    return render_template("add.html")
+        return redirect("/home")
+    return render_template("add.html", categories=unique_categories)
 
 @app.route("/edit/<int:task_id>", methods=["GET", "POST"])
 def edit(task_id):
     if "user_id" not in session:
         return redirect("/login")
+    response = requests.get(f"{API_URL}/api/categories/{session['user_id']}")
+    unique_categories = response.json()
     if request.method == "POST":
         updated_task = {
             "title": request.form["title"],
@@ -123,9 +167,9 @@ def edit(task_id):
             "due_date": request.form["due_date"]
         }
         requests.put(f"{API_URL}/api/task/{task_id}", json=updated_task)
-        return redirect("/")
+        return redirect("/home")
     task = requests.get(f"{API_URL}/api/task/{task_id}").json()
-    return render_template("edit.html", task=task)
+    return render_template("edit.html", task=task, categories=unique_categories)
 
 @app.route("/delete/<int:task_id>")
 def delete(task_id):
@@ -145,7 +189,9 @@ def profile():
         filename = None
         if file and allowed_file(file.filename):
             filename = f"user_{session['user_id']}_{secure_filename(file.filename)}"
-            file.save(os.path.join("frontend", app.config['UPLOAD_FOLDER'], filename))
+            filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            os.makedirs(os.path.dirname(filepath), exist_ok=True)
+            file.save(filepath)
         payload = {"name": name, "surname": surname}
         if filename:
             payload["image"] = filename
@@ -188,6 +234,20 @@ def delete_category():
         "user_id": user_id,
         "name": name
     })
+    return redirect("/categories")
+
+@app.route("/categories/add", methods=["POST"])
+def add_category():
+    user_id = session.get("user_id")
+    if not user_id:
+        return redirect("/login")
+
+    new_category = request.form.get("new_category")
+    if new_category:
+        requests.post(f"{API_URL}/api/categories/add", json={
+            "user_id": user_id,
+            "category": new_category
+        })
     return redirect("/categories")
 
 if __name__ == "__main__":

@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block title %}Welcome to TaskDock{% endblock %}
+{% block content %}
+<div class="landing-container text-center">
+    <h1 class="fw-bold">Welcome to <span class="taskdock-text">TaskDock</span></h1>
+    <p class="lead">Organize your tasks. Track your progress. Be productive.</p>
+    <div class="mt-4">
+        <a href="{{ url_for('login') }}" class="btn btn-login me-3">Login</a>
+        <a href="{{ url_for('register') }}" class="btn btn-register">Register</a>
+    </div>
+</div>
+{% endblock %}

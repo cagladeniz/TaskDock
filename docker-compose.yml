@@ -14,6 +14,8 @@ services:
       - "5050:5000"   
     depends_on:
       - backend
+    volumes:
+      - ./frontend/static/uploads:/app/static/uploads
   
 volumes:
     backend_data:

@@ -1,166 +1,272 @@
 body {
-  background: linear-gradient(180deg, #F3F6F9 100%, #2196F3 50%, #7B1FA2 0%);
-  background-attachment: fixed;
+    margin: 0;
+    font-family: 'Segoe UI', sans-serif;
+    color: white;
+}
+
+.gradient-bg {
+  background: linear-gradient(135deg, #F2E6EE, #FFCCF2, #977DFF, #0033FF, #0600AF);
   background-repeat: no-repeat;
+  background-attachment: fixed;
   min-height: 100vh;
 }
 
+/* @keyframes gradientBG {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+} */
+
+.landing-container {
+    height: 90vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.taskdock-text {
+    color: #0033FF;
+}
+
+.btn-login {
+    background-color: #0033FF;
+    border: none;
+    color: white;
+    padding: 12px 30px;
+    font-size: 1.1em;
+    border-radius: 8px;
+}
+
+.btn-register {
+    background-color: white;
+    color: #0033FF;
+    padding: 12px 30px;
+    font-size: 1.1em;
+    border-radius: 8px;
+    border: none;
+}
+
 .content {
-  background: transparent !important;
+    background: transparent !important;
 }
 
 .container-fluid {
-  background: transparent !important;
+    background: transparent !important;
 }
 
-  /* Status etiketlerinin renkleri */
-  .bg-success-subtle {
+.bg-success-subtle {
     background-color: #d1e7dd !important;
-  }
-  
-  .bg-warning-subtle {
+}
+
+.bg-warning-subtle {
     background-color: #fff3cd !important;
-  }
-  
-  .bg-info-subtle {
+}
+
+.bg-info-subtle {
     background-color: #cff4fc !important;
-  }
-  
-  /* Overdue task kartı için kırmızı kenarlık */
-  .border-danger {
-    border-width: 2px !important;
-  }
-  
-  .task-board {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;}
+}
+
+.border-danger {
+    border: 1.5px solid rgba(220, 38, 38, 0.4) !important;
+}
+
+.task-board {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
 
 .task-header {
-  font-weight: 600;
-  font-size: 1.1rem;
-  margin-bottom: .5rem;
+    font-weight: 600;
+    font-size: 1.1rem;
+    margin-bottom: .5rem;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
 }
 
 .task-description {
-  font-size: 0.95rem;
-  margin-bottom: 0.75rem;
+    font-size: 0.95rem;
+    margin-bottom: 0.75rem;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
 }
 
-
-/* 🧩 Görev Kartları */
 .task-card {
-  background: white;
-  border-radius: 1rem;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-  transition: all 0.3s ease-in-out;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 1rem;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    transition: all 0.3s ease-in-out;
+    padding: 1rem;
+    position: relative;
 }
+
 .task-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
 }
 
 .task-status-container {
-  position: absolute;
-  bottom: 12px;
-  right: 16px;
+    margin-top: 0.75rem;
 }
 
-/* 🟢 Durum Etiketleri */
 .status-completed {
-  background-color: #D1FAE5;
-  color: #065F46;
+    background-color: #D1FAE5;
+    color: #065F46;
+    padding: 4px 12px;
+    border-radius: 999px;
+    font-weight: 500;
 }
 
 .status-pending {
-  background-color: #FFEFD5;
-  color: #B45309;
+    background-color: #FEF9C3;
+    color: #92400E;
+    padding: 4px 12px;
+    border-radius: 999px;
+    font-weight: 500;
 }
 
 .status-in-progress {
-  background-color: #DBEAFE;
-  color: #1D4ED8;
+    background-color: #DBEAFE;
+    color: #1D4ED8;
+    padding: 4px 12px;
+    border-radius: 999px;
+    font-weight: 500;
 }
 
-/* Tüm kart, buton ve inputlar oval olsun */
+.status-overdue {
+    background-color: #FECACA;
+    color: #B91C1C;
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: 999px;
+}
+
+.btn-edit {
+    background-color: #FFE28A;
+    color: #5C4400;
+    border: none;
+    font-weight: 500;
+    border-radius: 8px;
+    padding: 6px 16px;
+}
+
+.btn-delete {
+    background-color: #FCA5A5;
+    color: #7F1D1D;
+    border: none;
+    font-weight: 500;
+    border-radius: 8px;
+    padding: 6px 16px;
+}
+
 .card, .btn, .form-control {
-  border-radius: 12px;
+    border-radius: 12px;
 }
 
-/* 🌈 Sidebar (Gradyan + Oval Kenar) */
 .sidebar {
-  background: linear-gradient(180deg, #977DFF 0%, #0033FF 100%);
-  min-width: 220px;
-  height: 100vh;
-  transition: transform 0.3s ease-in-out;
-  border-top-right-radius: 2rem;
-  border-bottom-right-radius: 2rem;
-  color: white;
+    background: linear-gradient(180deg, #977DFF 0%, #0033FF 100%);
+    min-width: 220px;
+    height: 100vh;
+    transition: transform 0.3s ease-in-out;
+    border-top-right-radius: 2rem;
+    border-bottom-right-radius: 2rem;
+    color: white;
+    position: relative;
 }
 
 .sidebar .nav-link.active {
-  background-color: rgba(255, 255, 255, 0.3);
+  background-color: rgba(255, 255, 255, 0.15);
   border-radius: 12px;
   font-weight: 600;
 }
 
-/* ☰ Toggle Button */
+.sidebar .nav-link:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
 #toggleBtn {
-  background: rgba(255, 255, 255, 0.2);
-  color: rgb(154, 113, 244);
-  border: none;
-  padding: 6px 12px;
-  border-radius: 8px;
+    background: rgba(255, 255, 255, 0.2);
+    color: rgb(154, 113, 244);
+    border: none;
+    padding: 6px 12px;
+    border-radius: 8px;
 }
+
 #toggleBtn:hover {
-  background: rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.3);
 }
 
-/* Sidebar içindeki logout butonunun alta sabitlenmesi */
 .logout-btn {
-  position: absolute;
-  bottom: 20px;
-  left: 20px;
-  right: 20px;
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    right: 20px;
 }
 
-/* Profil ve bildirim kutularının hizalı görünmesi */
 .profile-section {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 
-/* Bildirim ikonu için kırmızı nokta */
+.notification-btn {
+  background: rgba(255, 255, 255, 0.3) !important;
+  border: none;
+  border-radius: 8px;
+  padding: 6px 12px;
+  color: #0033FF;
+  backdrop-filter: blur(6px);
+  transition: background 0.3s ease;
+}
+
+.notification-btn:hover {
+  background: rgba(255, 255, 255, 0.4) !important;
+}
+
 .notification-icon {
-  position: relative;
+    position: relative;
 }
 
 .notification-icon::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 10px;
-  height: 10px;
-  background: red;
-  border-radius: 50%;
-  border: 2px solid white;
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 10px;
+    height: 10px;
+    background: red;
+    border-radius: 50%;
+    border: 2px solid white;
 }
 
-/* Stats panel geçiş efekti */
 #stats-panel.fade {
-  transition: opacity 0.5s ease-in-out;
+    transition: opacity 0.5s ease-in-out;
 }
 
 #stats-panel.fade,
 #filter-panel.fade {
-  transition: opacity 0.4s ease;
+    transition: opacity 0.4s ease;
+}
+
+#preview:hover {
+  filter: brightness(85%);
+  transition: 0.3s ease;
+}
+
+#preview {
+  transition: filter 0.3s ease;
+}
+
+input.form-control {
+  border-radius: 10px;
+}
+
+.btn {
+  border-radius: 8px;
+  font-weight: 500;
 }
 
 @media (max-width: 768px) {
-
-  /* Görev sütunları dik gelsin */
   .overflow-auto {
     flex-direction: column !important;
   }
@@ -170,7 +276,6 @@ body {
     margin-bottom: 1rem;
   }
 
-  /* Stats panel üstte alt alta gelsin */
   #stats-panel {
     flex-direction: column;
   }
@@ -179,7 +284,6 @@ body {
     width: 100% !important;
   }
 
-  /* Filtre alanı alt alta gelsin */
   #filter-panel {
     flex-direction: column !important;
   }
@@ -188,20 +292,27 @@ body {
     margin-top: 0.5rem;
   }
 
-  /* Başlık ve butonlar mobilde dik gelsin */
   h2.mb-4.d-flex {
     flex-direction: column;
     align-items: flex-start;
     gap: 0.5rem;
   }
 
-  /* Sidebar daralsın */
   .sidebar {
-    min-width: 100% !important;
-    height: auto;
-    border-radius: 0;
-    padding: 1rem;
-    margin-bottom: 1rem;
+    position: fixed;
+    top: 0;
+    left: -100%;
+    z-index: 1050;
+    transition: left 0.3s ease-in-out;
+    height: 100vh;
+  }
+
+  .sidebar.show {
+    left: 0;
+  }
+
+  .content {
+    width: 100%;
   }
 
   .sidebar .nav-link {
@@ -209,7 +320,6 @@ body {
     margin-bottom: 0.75rem;
   }
 
-  /* Header'daki profil yazısı ve ikon */
   .profile-section {
     flex-direction: column;
     align-items: flex-start;

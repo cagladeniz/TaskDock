@@ -10,7 +10,8 @@ def init_db():
             name TEXT,
             surname TEXT,
             email TEXT NOT NULL UNIQUE,
-            password_hash TEXT NOT NULL
+            password_hash TEXT NOT NULL,
+            image TEXT
         )
     """)
     cur.execute("""
@@ -23,6 +24,13 @@ def init_db():
             due_date TEXT,
             user_id INTEGER,
             FOREIGN KEY(user_id) REFERENCES users(id)
+        )
+    """)
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS categories (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            name TEXT NOT NULL
         )
     """)
     conn.commit()
@@ -114,8 +122,6 @@ def delete_task(task_id):
     cur.execute("DELETE FROM tasks WHERE id=?", (task_id,))
     conn.commit()
     conn.close()
-    
-# --- Destek fonksiyonları ---
 
 def get_user_by_id(user_id):
     conn = sqlite3.connect("data/tasks.db")
