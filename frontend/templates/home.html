@@ -2,13 +2,12 @@
 {% set active = 'home' %}
 {% block title %}Task Board{% endblock %}
 {% block content %}
-<h2 class="mb-4 d-flex justify-content-between align-items-center">
-  Task Board
-  <button id="toggle-button" class="btn btn-outline-primary" onclick="toggleStats()">Show Stats</button>
-</h2>
 
-<div class="text-start mb-3">
+<h2 class="mb-4" style="font-weight: 800; text-shadow: 2px 2px 6px rgba(0,0,0,0.3);">Task Board</h2>
+
+<div class="d-flex gap-2 mb-4">
   <button id="filter-toggle-btn" class="btn btn-outline-secondary" onclick="toggleFilter()">Filter</button>
+  <button id="toggle-button" class="btn btn-outline-primary" onclick="toggleStats()">Show Stats</button>
 </div>
 
 <form method="GET" id="filter-panel" class="row g-3 align-items-end mb-4 fade" style="display: none; opacity: 0;">
@@ -16,22 +15,31 @@
     <label for="status" class="form-label">Status</label>
     <select name="status" id="status" class="form-select">
       <option value="">All</option>
-      <option value="Pending">Pending</option>
-      <option value="In Progress">In Progress</option>
-      <option value="Completed">Completed</option>
+      <option value="Pending" {% if request.args.get('status') == 'Pending' %}selected{% endif %}>Pending</option>
+      <option value="In Progress" {% if request.args.get('status') == 'In Progress' %}selected{% endif %}>In Progress</option>
+      <option value="Completed" {% if request.args.get('status') == 'Completed' %}selected{% endif %}>Completed</option>
     </select>
   </div>
   <div class="col-md-3">
     <label for="category" class="form-label">Category</label>
-    <input type="text" name="category" id="category" class="form-control" placeholder="Enter category">
+    <select name="category" id="category" class="form-select">
+      <option value="">All Categories</option>
+      {% for cat in categories %}
+        <option value="{{ cat }}" {% if request.args.get('category') == cat %}selected{% endif %}>
+          {{ cat if cat else 'Uncategorized' }}
+        </option>
+      {% endfor %}
+    </select>
   </div>
   <div class="col-md-3">
-    <label for="due_before" class="form-label">Due Before</label>
-    <input type="date" name="due_before" id="due_before" class="form-control">
+    <label for="due_before" class="form-label">Due Date</label>
+    <input type="date" name="due_before" id="due_before" class="form-control"
+       value="{{ request.args.get('due_before', '') }}">
   </div>
-  <div class="col-md-3 text-end">
-    <button type="submit" class="btn btn-primary w-100">Apply Filter</button>
-  </div>
+  <div class="col-md-3 text-end d-flex align-items-end gap-2">
+  <button type="submit" class="btn btn-primary">Apply</button>
+  <a href="{{ url_for('home') }}" class="btn btn-outline-secondary ms-2">Clear</a>
+</div>
 </form>
 
 <!-- Stats Panel -->
@@ -63,18 +71,13 @@
   <div class="d-flex overflow-auto">
     {% for category, tasks_in_category in grouped_tasks.items() %}
     <div class="me-4" style="min-width: 300px;">
-      <h5 class="mb-3">{{ category if category else 'Uncategorized' }}</h5>
+      <h5 class="mb-3"style="text-shadow: 2px 2px 6px rgba(0,0,0,0.3);">{{ category if category else 'Uncategorized' }}</h5>
       <div class="d-flex flex-column gap-3">
         {% for task in tasks_in_category %}
         <div class="task-card position-relative {% if task.is_overdue %}border border-danger{% endif %}">
           <div class="task-header">{{ task.title }}</div>
           <div class="task-description">{{ task.description }}</div>
-          <p class="mb-1">
-            <strong>Due Date:</strong> {{ task.due_date }}
-            {% if task.is_overdue %}
-              <span class="status-overdue ms-2">Overdue</span>
-            {% endif %}
-          </p>
+          <p class="mb-1"><strong>Due Date:</strong> {{ task.due_date }}</p>
           <div class="task-status-container">
             {% if task.status == 'Completed' %}
               <span class="status-completed">Completed</span>
@@ -128,13 +131,13 @@ function toggleFilter() {
     setTimeout(() => {
       panel.style.opacity = 1;
     }, 10);
-    button.textContent = "Hide Filters";
+    button.textContent = "Hide Filter";
   } else {
     panel.style.opacity = 0;
     setTimeout(() => {
       panel.style.display = "none";
     }, 400);
-    button.textContent = "Filter Tasks";
+    button.textContent = "Filter";
   }
 }
 </script>

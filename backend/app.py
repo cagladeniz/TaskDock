@@ -10,7 +10,9 @@ from models import (
     update_task,
     delete_task,
     create_user,
-    authenticate_user )
+    authenticate_user,
+    delete_category_for_user, 
+    rename_category_for_user)
 
 app = Flask(__name__)
 init_db()
@@ -99,28 +101,19 @@ def get_stats(user_id):
 
 @app.route("/api/categories/rename", methods=["PUT"])
 def rename_category_api():
-    data = request.get_json()
+    data = request.json
     user_id = data["user_id"]
-    old = data["old_name"]
-    new = data["new_name"]
-    conn = sqlite3.connect("data/tasks.db")
-    cur = conn.cursor()
-    cur.execute("UPDATE tasks SET category = ? WHERE user_id = ? AND category = ?", (new, user_id, old))
-    conn.commit()
-    conn.close()
+    old_name = data["old_name"]
+    new_name = data["new_name"]
+    rename_category_for_user(user_id, old_name, new_name)
     return jsonify({"message": "Renamed"}), 200
 
 @app.route("/api/categories/delete", methods=["PUT"])
 def delete_category_api():
-    data = request.get_json()
+    data = request.json
     user_id = data["user_id"]
     name = data["name"]
-
-    conn = sqlite3.connect("data/tasks.db")
-    cur = conn.cursor()
-    cur.execute("UPDATE tasks SET category = NULL WHERE user_id = ? AND category = ?", (user_id, name))
-    conn.commit()
-    conn.close()
+    delete_category_for_user(user_id, name)
     return jsonify({"message": "Deleted"}), 200
 
 @app.route('/api/categories/add', methods=['POST'])

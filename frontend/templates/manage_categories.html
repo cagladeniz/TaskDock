@@ -3,43 +3,32 @@
 {% block title %}Manage Categories{% endblock %}
 {% block content %}
 
-<h2 class="mb-4">Manage Categories</h2>
-<div class="card p-4 mb-4" style="max-width: 600px; margin: 0 auto; border-radius: 1rem;">
-  <form action="/categories/add" method="POST" class="d-flex gap-3 align-items-center">
+<h2 class="mb-4 text-center">Manage Categories</h2>
+
+<div class="add-category-card">
+  <form action="/categories/add" method="POST" class="d-flex w-100 gap-3 align-items-center">
     <input type="text" name="new_category" class="form-control" placeholder="New category name" required>
     <button type="submit" class="btn btn-primary">Add</button>
   </form>
 </div>
-<div class="table-responsive" style="max-width: 800px; margin: 0 auto;">
-  <table class="table table-bordered table-hover align-middle text-center bg-white" style="border-radius: 1rem; overflow: hidden;">
-    <thead class="table-light">
-      <tr>
-        <th>Category</th>
-        <th style="width: 40%;">Rename</th>
-        <th style="width: 20%;">Delete</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for category in categories %}
-      <tr>
-        <td>{{ category if category else 'Uncategorized' }}</td>
-        <td>
-          <form action="/categories/rename" method="POST" class="d-flex gap-2">
-            <input type="hidden" name="old_name" value="{{ category }}">
-            <input type="text" name="new_name" class="form-control" placeholder="New name" required>
-            <button type="submit" class="btn btn-warning">Rename</button>
-          </form>
-        </td>
-        <td>
-          <form action="/categories/delete" method="POST">
-            <input type="hidden" name="name" value="{{ category }}">
-            <button type="submit" class="btn btn-danger">Delete</button>
-          </form>
-        </td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+
+<div class="category-container">
+  {% for category in categories %}
+  <div class="category-card">
+    <h5>{{ category if category else 'Uncategorized' }}</h5>
+    <div class="actions">
+      <form action="/categories/rename" method="POST" class="d-flex flex-column gap-2">
+        <input type="hidden" name="old_name" value="{{ category }}">
+        <input type="text" name="new_name" class="form-control" placeholder="New name" required>
+        <button type="submit" class="btn-rename">Rename</button>
+      </form>
+      <form action="/categories/delete" method="POST">
+        <input type="hidden" name="name" value="{{ category }}">
+        <button type="submit" class="btn-delete">Delete</button>
+      </form>
+    </div>
+  </div>
+  {% endfor %}
 </div>
 
 {% endblock %}

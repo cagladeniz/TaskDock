@@ -2,7 +2,6 @@
 {% set active = 'add' %}
 {% block title %}Add Task{% endblock %}
 {% block content %}
-<h2 class="mb-4">Add New Task</h2>
 <div class="card shadow-sm p-4" style="max-width: 600px; margin: 0 auto;">
   <form method="POST">
     <div class="mb-3">
@@ -16,6 +15,7 @@
     <div class="mb-3">
       <label for="status" class="form-label">Status</label>
       <select class="form-select" name="status">
+        <option value="">Select Status</option>
         <option>Pending</option>
         <option>In Progress</option>
         <option>Completed</option>

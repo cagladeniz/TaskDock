@@ -146,3 +146,19 @@ def get_user_task_stats(user_id):
         "pending": pending,
         "inprogress": inprogress
     }
+
+def delete_category_for_user(user_id, name):
+    conn = sqlite3.connect("data/tasks.db")
+    cur = conn.cursor()
+    cur.execute("DELETE FROM categories WHERE name = ? AND user_id = ?", (name, user_id))
+    cur.execute("UPDATE tasks SET category = NULL WHERE category = ? AND user_id = ?", (name, user_id))
+    conn.commit()
+    conn.close()
+
+def rename_category_for_user(user_id, old_name, new_name):
+    conn = sqlite3.connect("data/tasks.db")
+    cur = conn.cursor()
+    cur.execute("UPDATE categories SET name = ? WHERE name = ? AND user_id = ?", (new_name, old_name, user_id))
+    cur.execute("UPDATE tasks SET category = ? WHERE category = ? AND user_id = ?", (new_name, old_name, user_id))
+    conn.commit()
+    conn.close()

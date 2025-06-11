@@ -48,14 +48,15 @@ def index():
 def home():
     if "user_id" not in session:
         return redirect("/login")
-    
+
     all_tasks = requests.get(f"{API_URL}/api/tasks/{session['user_id']}").json()
     status_filter = request.args.get("status")
     category_filter = request.args.get("category")
     due_before = request.args.get("due_before")
     today = date.today().isoformat()
     filtered_tasks = []
-    overdue_count = 0
+    grouped_tasks = defaultdict(list)
+    completed = pending = inprogress = overdue = 0
 
     for task in all_tasks:
         is_overdue = (
@@ -64,30 +65,43 @@ def home():
             task["status"] in ["Pending", "In Progress"]
         )
         task["is_overdue"] = is_overdue
-        if is_overdue:
-            overdue_count += 1
+
+        if is_overdue and status_filter:
+            overdue += 1
+            continue
+
         if status_filter and task["status"] != status_filter:
             continue
-        if category_filter and category_filter.lower() not in (task["category"] or "").lower():
+
+        if category_filter and (task["category"] or "") != category_filter:
             continue
+
         if due_before and task["due_date"] and task["due_date"] > due_before:
             continue
-        filtered_tasks.append(task)
 
-    grouped_tasks = defaultdict(list)
-    for task in filtered_tasks:
+        if is_overdue:
+            overdue += 1
+        elif task["status"] == "Completed":
+            completed += 1
+        elif task["status"] == "Pending":
+            pending += 1
+        elif task["status"] == "In Progress":
+            inprogress += 1
+
+        filtered_tasks.append(task)
         cat = task["category"] if task["category"] else "Uncategorized"
         grouped_tasks[cat].append(task)
 
-    status_count = Counter(t["status"] for t in filtered_tasks)
     stats = {
         "total": len(filtered_tasks),
-        "completed": status_count.get("Completed", 0),
-        "pending": status_count.get("Pending", 0),
-        "inprogress": status_count.get("In Progress", 0),
-        "overdue": overdue_count
+        "completed": completed,
+        "pending": pending,
+        "inprogress": inprogress,
+        "overdue": overdue
     }
-    return render_template("home.html", grouped_tasks=grouped_tasks, current_date=today, stats=stats)
+    response = requests.get(f"{API_URL}/api/categories/{session['user_id']}")
+    unique_categories = response.json()
+    return render_template("home.html", grouped_tasks=grouped_tasks, current_date=today, stats=stats, categories=unique_categories)
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -200,15 +214,13 @@ def profile():
     stats = requests.get(f"{API_URL}/api/user/{session['user_id']}/stats").json()
     return render_template("profile.html", user=user, **stats)
 
-@app.route("/categories", methods=["GET"])
+@app.route("/categories")
 def manage_categories():
     if "user_id" not in session:
         return redirect("/login")
-    response = requests.get(f"{API_URL}/api/tasks/{session['user_id']}")
-    tasks = response.json()
-    unique_categories = sorted(set(t["category"] for t in tasks))
-    return render_template("manage_categories.html", categories=unique_categories)
-
+    response = requests.get(f"{API_URL}/api/categories/{session['user_id']}")
+    categories = response.json()
+    return render_template("manage_categories.html", categories=categories)
 
 @app.route("/categories/rename", methods=["POST"])
 def rename_category():
@@ -226,11 +238,9 @@ def rename_category():
 
 @app.route("/categories/delete", methods=["POST"])
 def delete_category():
-    user_id = session.get("user_id")
-    if not user_id:
-        return redirect("/login")
     name = request.form.get("name")
-    requests.put(f"{API_URL}/api/categories/delete", json={
+    user_id = session.get("user_id")
+    response = requests.put(f"{API_URL}/api/categories/delete", json={
         "user_id": user_id,
         "name": name
     })

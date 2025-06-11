@@ -5,7 +5,7 @@ body {
 }
 
 .gradient-bg {
-  background: linear-gradient(135deg, #F2E6EE, #FFCCF2, #977DFF, #0033FF, #0600AF);
+  background: linear-gradient(135deg, #F2E6EE, #ffeffb, #977DFF, #0033FF, #0600AF);
   background-repeat: no-repeat;
   background-attachment: fixed;
   min-height: 100vh;
@@ -16,6 +16,83 @@ body {
     50% { background-position: 100% 50%; }
     100% { background-position: 0% 50%; }
 } */
+
+.add-category-card {
+  background-color: rgba(255, 255, 255, 0.3);
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  max-width: 600px;
+  margin: 0 auto 32px;
+  color: #333;
+}
+
+.add-category-card:hover {
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+}
+
+.category-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.category-card {
+  background-color: rgba(255, 255, 255, 0.3);
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+  transition: transform 0.2s ease-in-out;
+  color: #333;
+}
+
+.category-card:hover {
+  transform: scale(1.02);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+}
+
+.category-card h5 {
+  font-size: 1.1rem;
+  margin-bottom: 12px;
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.actions input {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  color: #333;
+}
+
+.btn-rename {
+  background-color: #FFE28A;
+  color: #000;
+  border: none;
+  border-radius: 8px;
+  padding: 8px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.btn-primary {
+  background-color: #007BFF;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+}
 
 .landing-container {
     height: 90vh;
@@ -163,36 +240,75 @@ body {
     border-radius: 12px;
 }
 
+.content {
+  position: relative;
+  z-index: 1;
+  transition: margin-left 0.3s ease-in-out;
+}
+
+.sidebar.show ~ .content {
+  margin-left: 220px;
+}
+
 .sidebar {
-    background: linear-gradient(180deg, #977DFF 0%, #0033FF 100%);
-    min-width: 220px;
-    height: 100vh;
-    transition: transform 0.3s ease-in-out;
-    border-top-right-radius: 2rem;
-    border-bottom-right-radius: 2rem;
-    color: white;
-    position: relative;
+  position: fixed;
+  top: 0;
+  left: -100%;
+  height: 100vh;
+  width: 220px;
+  background: linear-gradient(180deg, #977DFF 0%, #0033FF 100%);
+  transition: transform 0.4s ease-in-out, left 0.4s ease-in-out;
+  z-index: 1050;
+  border-top-right-radius: 2rem;
+  border-bottom-right-radius: 2rem;
+}
+
+.sidebar.show {
+  transform: translateX(0);
 }
 
 .sidebar .nav-link.active {
   background-color: rgba(255, 255, 255, 0.15);
   border-radius: 12px;
   font-weight: 600;
+  color: white !important;
 }
 
 .sidebar .nav-link:hover {
   background-color: rgba(255, 255, 255, 0.1);
 }
 
-#toggleBtn {
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 1000;
+  transition: opacity 0.3s ease;
+}
+
+.overlay.d-none {
+  display: none;
+  opacity: 0;
+}
+
+.overlay.show {
+  display: block;
+  opacity: 1;
+}
+
+#sidebarToggle {
     background: rgba(255, 255, 255, 0.2);
     color: rgb(154, 113, 244);
     border: none;
     padding: 6px 12px;
     border-radius: 8px;
+    transition: background 0.3s ease;
 }
 
-#toggleBtn:hover {
+#sidebarToggle:hover {
     background: rgba(255, 255, 255, 0.3);
 }
 
@@ -266,7 +382,52 @@ input.form-control {
   font-weight: 500;
 }
 
+@media (min-width: 769px) {
+  .sidebar {
+    position: fixed;
+    left: -100%;
+  }
+
+  .sidebar.show {
+    left: 0;
+  }
+
+  .overlay {
+    display: none !important;
+  }
+}
+
 @media (max-width: 768px) {
+
+  .btn, .btn-rename, .btn-delete {
+    padding: 6px 12px;
+    font-size: 0.9rem;
+  }
+
+  .category-card,
+  .add-category-card {
+    width: 100%;
+  }
+
+  .category-container {
+    grid-template-columns: 1fr;
+    padding: 0 1rem;
+  }
+
+  .category-card form {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .category-card {
+  margin: 0 0 12px 0;
+  }
+
+  .content.container-fluid {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
   .overflow-auto {
     flex-direction: column !important;
   }
@@ -274,6 +435,7 @@ input.form-control {
   .task-card {
     width: 100%;
     margin-bottom: 1rem;
+    padding: 1.25rem 1.5rem;
   }
 
   #stats-panel {
@@ -296,6 +458,11 @@ input.form-control {
     flex-direction: column;
     align-items: flex-start;
     gap: 0.5rem;
+  }
+
+  h2.mb-4 {
+  text-align: center;
+  font-size: 1.5rem;
   }
 
   .sidebar {
