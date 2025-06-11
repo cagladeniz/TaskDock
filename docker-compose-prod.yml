@@ -1,0 +1,17 @@
+version: '3'
+services:
+  backend:
+    build: ./backend
+    image: taskdockfinal-backend
+    volumes:
+      - backend_data:/app/data
+
+  frontend:
+    build: ./frontend
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend/static/uploads:/app/static/uploads
+
+volumes:
+  backend_data:
