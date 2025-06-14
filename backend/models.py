@@ -2,7 +2,7 @@ import sqlite3
 import hashlib
 
 def init_db():
-    conn = sqlite3.connect("data/tasks.db")
+    conn = sqlite3.connect("/data/tasks.db")
     cur = conn.cursor()
     cur.execute("""
         CREATE TABLE IF NOT EXISTS users (
@@ -40,7 +40,7 @@ def hash_password(password):
     return hashlib.sha256(password.encode()).hexdigest()
 
 def create_user(name, surname, email, password):
-    conn = sqlite3.connect("data/tasks.db")
+    conn = sqlite3.connect("/data/tasks.db")
     cur = conn.cursor()
     try:
         cur.execute(
@@ -55,7 +55,7 @@ def create_user(name, surname, email, password):
     return True
 
 def authenticate_user(email, password):
-    conn = sqlite3.connect("data/tasks.db")
+    conn = sqlite3.connect("/data/tasks.db")
     cur = conn.cursor()
     cur.execute("SELECT id FROM users WHERE email=? AND password_hash=?", (email, hash_password(password)))
     row = cur.fetchone()
@@ -63,7 +63,7 @@ def authenticate_user(email, password):
     return row[0] if row else None
 
 def get_tasks_by_user(user_id):
-    conn = sqlite3.connect("data/tasks.db")
+    conn = sqlite3.connect("/data/tasks.db")
     cur = conn.cursor()
     cur.execute("SELECT * FROM tasks WHERE user_id=?", (user_id,))
     tasks = [{
@@ -79,7 +79,7 @@ def get_tasks_by_user(user_id):
     return tasks
 
 def get_task_by_id(task_id):
-    conn = sqlite3.connect("data/tasks.db")
+    conn = sqlite3.connect("/data/tasks.db")
     cur = conn.cursor()
     cur.execute("SELECT * FROM tasks WHERE id=?", (task_id,))
     row = cur.fetchone()
@@ -97,7 +97,7 @@ def get_task_by_id(task_id):
     return None
 
 def add_task(title, description, status, category, due_date, user_id):
-    conn = sqlite3.connect("data/tasks.db")
+    conn = sqlite3.connect("/data/tasks.db")
     cur = conn.cursor()
     cur.execute(
         "INSERT INTO tasks (title, description, status, category, due_date, user_id) VALUES (?, ?, ?, ?, ?, ?)",
@@ -107,7 +107,7 @@ def add_task(title, description, status, category, due_date, user_id):
     conn.close()
 
 def update_task(task_id, title, description, status, category, due_date):
-    conn = sqlite3.connect("data/tasks.db")
+    conn = sqlite3.connect("/data/tasks.db")
     cur = conn.cursor()
     cur.execute(
         "UPDATE tasks SET title=?, description=?, status=?, category=?, due_date=? WHERE id=?",
@@ -117,14 +117,14 @@ def update_task(task_id, title, description, status, category, due_date):
     conn.close()
 
 def delete_task(task_id):
-    conn = sqlite3.connect("data/tasks.db")
+    conn = sqlite3.connect("/data/tasks.db")
     cur = conn.cursor()
     cur.execute("DELETE FROM tasks WHERE id=?", (task_id,))
     conn.commit()
     conn.close()
 
 def get_user_by_id(user_id):
-    conn = sqlite3.connect("data/tasks.db")
+    conn = sqlite3.connect("/data/tasks.db")
     conn.row_factory = sqlite3.Row
     cur = conn.cursor()
     cur.execute("SELECT * FROM users WHERE id = ?", (user_id,))
@@ -133,7 +133,7 @@ def get_user_by_id(user_id):
     return dict(user) if user else None
 
 def get_user_task_stats(user_id):
-    conn = sqlite3.connect("data/tasks.db")
+    conn = sqlite3.connect("/data/tasks.db")
     cur = conn.cursor()
     total = cur.execute("SELECT COUNT(*) FROM tasks WHERE user_id = ?", (user_id,)).fetchone()[0]
     completed = cur.execute("SELECT COUNT(*) FROM tasks WHERE user_id = ? AND status = 'Completed'", (user_id,)).fetchone()[0]
@@ -148,7 +148,7 @@ def get_user_task_stats(user_id):
     }
 
 def delete_category_for_user(user_id, name):
-    conn = sqlite3.connect("data/tasks.db")
+    conn = sqlite3.connect("/data/tasks.db")
     cur = conn.cursor()
     cur.execute("DELETE FROM categories WHERE name = ? AND user_id = ?", (name, user_id))
     cur.execute("UPDATE tasks SET category = NULL WHERE category = ? AND user_id = ?", (name, user_id))
@@ -156,7 +156,7 @@ def delete_category_for_user(user_id, name):
     conn.close()
 
 def rename_category_for_user(user_id, old_name, new_name):
-    conn = sqlite3.connect("data/tasks.db")
+    conn = sqlite3.connect("/data/tasks.db")
     cur = conn.cursor()
     cur.execute("UPDATE categories SET name = ? WHERE name = ? AND user_id = ?", (new_name, old_name, user_id))
     cur.execute("UPDATE tasks SET category = ? WHERE category = ? AND user_id = ?", (new_name, old_name, user_id))

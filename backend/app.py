@@ -1,5 +1,6 @@
 import sqlite3
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 from models import (
     get_user_by_id,
     get_user_task_stats,
@@ -16,6 +17,8 @@ from models import (
 
 app = Flask(__name__)
 init_db()
+
+CORS(app, origins="*")
 
 @app.route("/api/register", methods=["POST"])
 def register():
@@ -39,7 +42,7 @@ def update_user(user_id):
         values.append(data["image"])
 
     values.append(user_id)
-    conn = sqlite3.connect("data/tasks.db")
+    conn = sqlite3.connect("/data/tasks.db")
     cur = conn.cursor()
     cur.execute(f"UPDATE users SET {', '.join(f + ' = ?' for f in fields)} WHERE id = ?", values)
     conn.commit()
@@ -123,7 +126,7 @@ def add_category():
     category = data.get("category")
     if not user_id or not category:
         return jsonify({"error": "Missing user_id or category"}), 400
-    conn = sqlite3.connect("data/tasks.db")
+    conn = sqlite3.connect("/data/tasks.db")
     cur = conn.cursor()
     cur.execute("SELECT 1 FROM categories WHERE user_id = ? AND name = ?", (user_id, category))
     if cur.fetchone():
@@ -136,7 +139,7 @@ def add_category():
 
 @app.route('/api/categories/<int:user_id>')
 def get_categories(user_id):
-    conn = sqlite3.connect("data/tasks.db")
+    conn = sqlite3.connect("/data/tasks.db")
     cur = conn.cursor()
     cur.execute("SELECT name FROM categories WHERE user_id = ?", (user_id,))
     results = [row[0] for row in cur.fetchall()]

@@ -12,7 +12,7 @@ UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), 'static/uploads')
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-API_URL = "http://backend:5001"
+API_URL = "https://backend-white-dream-6506.fly.dev"
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
