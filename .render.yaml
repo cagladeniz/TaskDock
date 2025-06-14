@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: frontend
+    env: docker
+    repo: https://github.com/cagladeniz/TaskDock
+    plan: free
+    dockerfilePath: ./frontend/Dockerfile
+    buildCommand: ""
+    startCommand: "python app.py"
+    autoDeploy: true
+    region: frankfurt
+
+  - type: web
+    name: backend
+    env: docker
+    repo: https://github.com/cagladeniz/TaskDock
+    plan: free
+    dockerfilePath: ./backend/Dockerfile
+    buildCommand: ""
+    startCommand: "python app.py"
+    autoDeploy: true
+    region: frankfurt
